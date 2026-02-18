@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Simulation</title>
+    <style>
+        :root {
+            --taskbar-bg: rgba(255, 255, 255, 0.85);
+            --win-blue: #0078d4;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: url('https://images.unsplash.com/photo-1620121692029-d088224efc74?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* Taskbar */
+        #taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: var(--taskbar-bg);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .task-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .icon:hover { transform: scale(1.2); }
+
+        /* Window System */
+        .window {
+            position: absolute;
+            width: 400px;
+            height: 300px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            resize: both;
+        }
+
+        .window-header {
+            padding: 10px;
+            background: #f3f3f3;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+        }
+
+        .window-content {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .close-btn { color: red; cursor: pointer; font-weight: bold; }
+
+        /* Task Manager Specific */
+        #task-list { width: 100%; border-collapse: collapse; }
+        #task-list th { text-align: left; border-bottom: 1px solid #ddd; }
+
+        #system-time {
+            position: absolute;
+            right: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="desktop"></div>
+
+<div id="taskbar">
+    <div class="task-icons">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/48/Windows_logo_-_2012_%28dark_blue%29.svg" class="icon" onclick="toggleStart()">
+        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968263.png" class="icon" onclick="openApp('browser')">
+        <img src="https://cdn-icons-png.flaticon.com/512/209/209392.png" class="icon" onclick="openApp('notepad')">
+        <img src="https://cdn-icons-png.flaticon.com/512/1006/1006132.png" class="icon" onclick="openApp('taskmgr')">
+    </div>
+    <div id="system-time"></div>
+</div>
+
+<div id="browser" class="window">
+    <div class="window-header"><span>Edge Browser</span> <span class="close-btn" onclick="closeApp('browser')">X</span></div>
+    <div class="window-content">
+        <input type="text" value="https://www.google.com" style="width: 80%">
+        <p>Welcome to the web. (Simulation only)</p>
+    </div>
+</div>
+
+<div id="notepad" class="window">
+    <div class="window-header"><span>Notepad</span> <span class="close-btn" onclick="closeApp('notepad')">X</span></div>
+    <div class="window-content">
+        <textarea style="width: 100%; height: 90%"></textarea>
+    </div>
+</div>
+
+<div id="taskmgr" class="window">
+    <div class="window-header"><span>Task Manager</span> <span class="close-btn" onclick="closeApp('taskmgr')">X</span></div>
+    <div class="window-content">
+        <table id="task-list">
+            <tr><th>Process</th><th>CPU</th><th>Memory</th></tr>
+            <tr><td>System</td><td>0.1%</td><td>12MB</td></tr>
+            <tr><td>Browser</td><td>2.4%</td><td>145MB</td></tr>
+            <tr><td>Notepad</td><td>0.0%</td><td>12MB</td></tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Update Clock
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('system-time').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }, 1000);
+
+    // Open/Close Logic
+    function openApp(id) {
+        document.getElementById(id).style.display = 'flex';
+        document.getElementById(id).style.top = '100px';
+        document.getElementById(id).style.left = '100px';
+    }
+
+    function closeApp(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    // Draggable Windows (Simple version)
+    const windows = document.querySelectorAll('.window');
+    windows.forEach(win => {
+        const header = win.querySelector('.window-header');
+        header.onmousedown = function(e) {
+            let shiftX = e.clientX - win.getBoundingClientRect().left;
+            let shiftY = e.clientY - win.getBoundingClientRect().top;
+            document.onmousemove = function(e) {
+                win.style.left = e.pageX - shiftX + 'px';
+                win.style.top = e.pageY - shiftY + 'px';
+            };
+            document.onmouseup = function() {
+                document.onmousemove = null;
+                win.onmouseup = null;
+            };
+        };
+    });
+</script>
+
+</body>
+</html>
